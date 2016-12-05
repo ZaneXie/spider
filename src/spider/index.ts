@@ -6,10 +6,13 @@ import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import Bluebird = require('bluebird');
 import fs = require('fs');
+import debugTool = require('debug');
+let debug = debugTool("spider");
 let csv: any = Bluebird.promisifyAll(require('csv'));
 
 function parse(pageNum: number) {
     let url = "http://cd.lianjia.com/chengjiao/pg" + pageNum + "/";
+    debug("parsing url: " + url);
     return requestPromise(url).then(cheerio.load).then(($) => {
         let result = [];
         $(".main-box .clinch-list li").each(function (key, ele) {
@@ -28,6 +31,7 @@ function parse(pageNum: number) {
             }
             result.push({id, title, detail, time, price, total, url});
         });
+        debug("get " + result.length + " elements.");
         return result;
     });
 }
@@ -35,12 +39,14 @@ function parse(pageNum: number) {
 let result = '';
 let i = 1;
 
-let totalPage = 100;
-let thread = 100;
+let totalPage = 10;
+let thread = 10;
 
 let run = () => {
     if (i > totalPage) {
+        debug("writing files...");
         fs.writeFileSync("D:\\123.csv", result, "utf-8");
+        debug("done");
         return;
     }
     let jobs = [];
