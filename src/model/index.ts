@@ -7,16 +7,24 @@ import fs =require('fs');
 import path = require('path');
 import Complex = require('./complex')
 import House = require('./house')
-import {dbConfig} from "../config/db";
+import {ComplexInstance, ComplexAttribute} from './complex';
+import {Model} from '~sequelize/index';
+import {HouseAttribute, HouseInstance} from './house';
+import {inject, injectable} from 'inversify';
+import {Connection} from '~sequelize/index';
+import {SERVICE_IDENTIFIER} from '../constants/ioc';
 
 export interface Base {
     id?: number;
 }
 
-let sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, dbConfig.option);
+@injectable()
+export class DataBase {
+    public complex: Model<ComplexInstance, ComplexAttribute>;
+    public house: Model<HouseInstance, HouseAttribute>;
 
-export const DataBase = {
-    Complex: Complex.define(sequelize),
-    House: House.define(sequelize),
-};
-sequelize.sync();
+    public constructor(@inject(SERVICE_IDENTIFIER.Sequelize) sequelize: Connection) {
+        this.complex = Complex.define(sequelize);
+        this.house = House.define(sequelize);
+    }
+}
