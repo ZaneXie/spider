@@ -11,7 +11,7 @@ import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("ComplexManager");
 
 export interface IComplexManager {
-    save(complex: ComplexAttribute);
+    save(complex: ComplexAttribute | ComplexAttribute[]);
 }
 
 @injectable()
@@ -23,9 +23,13 @@ export class ComplexManager extends BaseManager<ComplexAttribute> {
         this.database = database;
     }
 
-    public save(complex: ComplexAttribute) {
+    public save(complex: ComplexAttribute | ComplexAttribute[]) {
         //todo
         debug(complex);
-        this.database.complex.insertOrUpdate(complex);
+        if (Array.isArray(complex)) {
+            this.database.complex.bulkCreate(complex);
+        } else {
+            this.database.complex.insertOrUpdate(complex);
+        }
     }
 }

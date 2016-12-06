@@ -39,7 +39,7 @@ export class CDComplexSpider implements IComplexSpider {
             if (match && match[0]) {
                 id = match[0];
             }
-            result.push({id, url, where});
+            result.push({ljID: id, url, name: where});
         });
         debug("get " + result.length + " elements.");
         return result;
@@ -56,9 +56,7 @@ export class CDComplexSpider implements IComplexSpider {
         let jobs: Promise<any>[] = [];
         for (let k = 0; k < this.thread && this.i <= this.totalPage; k++, this.i++) {
             jobs.push(this.parse(this.i).then((obj) => {
-                obj.forEach((item, index) => {
-                    this.complexManager.save({ljID:item["id"], url:item["url"], name:item["where"]});
-                });
+                this.complexManager.save(obj);
             }));
         }
         await Promise.all(jobs);
