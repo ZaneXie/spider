@@ -15,7 +15,7 @@ async function parse(pageNum: number) {
     debug("parsing url: " + url);
     let html = await requestPromise(url);
     let $ = cheerio.load(html);
-    let result = [];
+    let result: {}[] = [];
     $(".main-box .clinch-list li").each(function (key, ele) {
         let title = $(ele).find("h2 a").text();
         let infos = $(ele).find(".div-cun");
@@ -26,7 +26,7 @@ async function parse(pageNum: number) {
         let url = $(ele).find(".info-panel h2 a").attr("href");
         let pattern = /.*\/(.*)\.html/
         let match = pattern.exec(url);
-        let id = null;
+        let id = {};
         if (match && match[1]) {
             id = match[1];
         }
@@ -49,7 +49,7 @@ let run = async() => {
         debug("done");
         return;
     }
-    let jobs = [];
+    let jobs: Promise<any>[] = [];
     for (let k = 0; k < thread && i <= totalPage; k++, i++) {
         jobs.push(parse(i).then(csv.stringifyAsync).then((line) => {
             result += line;

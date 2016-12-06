@@ -2,9 +2,15 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
+    "strictNullChecks": true,
     "sourceMap": true
   },
   "exclude": [
     "node_modules"
+  ],
+  "include":[
+    "typings/**/*",
+    "src/**/*",
+    "node_modules/inversify/dts/**/*"
   ]
 }

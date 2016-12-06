@@ -14,7 +14,7 @@ async function parse(houseId: number) {
     debug("parsing url: " + url);
     let html = await requestPromise(url);
     let $ = cheerio.load(html);
-    let result = [];
+    let result:{}[] = [];
     $(".main-box .house-lst li").each(function (key, ele) {
         let title = $(ele).find("h2 a").text();
         let where = $(ele).find(".where a span").text();
@@ -34,7 +34,7 @@ async function parse(houseId: number) {
         let url = $(ele).find(".info-panel h2 a").attr("href");
         let pattern = /.*\/(.*)\.html/
         let match = pattern.exec(url);
-        let id = null;
+        let id = "";
         if (match && match[1]) {
             id = match[1];
         }

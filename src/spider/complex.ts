@@ -19,13 +19,13 @@ export class CDComplexSpider implements ComplexSpider {
         debug("parsing url: " + url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
-        let result = [];
+        let result: {}[] = [];
         $(".main-box .house-lst li").each(function (key, ele) {
             let where = $(ele).find(".info-panel .where a span").text();
             let url = $(ele).find(".info-panel .where a").attr("href");
             let pattern = /(\d{8,})/
             let match = pattern.exec(url);
-            let id = null;
+            let id = "";
             if (match && match[0]) {
                 id = match[0];
             }
@@ -46,7 +46,7 @@ export class CDComplexSpider implements ComplexSpider {
             // debug("done");
             return;
         }
-        let jobs = [];
+        let jobs: Promise<any>[] = [];
         for (let k = 0; k < this.thread && this.i <= this.totalPage; k++, this.i++) {
             jobs.push(this.parse(this.i).then(csv.stringifyAsync).then((line) => {
                 // result += line;
