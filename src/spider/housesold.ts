@@ -6,12 +6,14 @@ import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import {getDebugger} from "../util/debug";
 let debug = getDebugger("spider");
+import {inject, injectable} from 'inversify';
 
-export interface HouseSoldSpider {
+export interface IHouseSoldSpider {
     run();
 }
 
-export class CDHouseSoldSpider implements HouseSoldSpider {
+@injectable()
+export class CDHouseSoldSpider implements IHouseSoldSpider {
 
     async parse(complexID: string) {
         let url = "http://cd.lianjia.com/chengjiao/c" + complexID + "/";

@@ -8,33 +8,29 @@ import Bluebird = require('bluebird');
 import fs = require('fs-extra-promise');
 import {getDebugger} from "../util/debug";
 import {IComplexSpider} from "./complex";
-import {CDHouseSellingSpider} from "./houseselling";
-import {CDHouseSoldSpider} from "./housesold";
+import {IHouseSellingSpider} from "./houseselling";
+import {IHouseSoldSpider} from "./housesold";
 import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {Connection} from '~sequelize/index';
 let debug = getDebugger("spider");
 
-let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
+function main() {
+    let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
 
-process.on("exit", () => {
-    debug("exiting...");
+    process.on("exit", () => {
+        debug("exiting...");
+        sequelize.sync();
+    });
+
+    let complexSpider = container.get<IComplexSpider>(SERVICE_IDENTIFIER.ComplexSpider);
+    let sellingSpider = container.get<IHouseSellingSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
+    let soldSpider = container.get<IHouseSoldSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     sequelize.sync();
-});
+    complexSpider.run();
+    sellingSpider.run();
+    soldSpider.run();
+}
 
-let spider = container.get<IComplexSpider>(SERVICE_IDENTIFIER.ComplexSpider);
+main();
 
-sequelize.sync();
-spider.run();
-
-// let run = async() => {
-//     debug("Start...")
-// let complexSpider = new CDComplexSpider();
-// let sellingSpider = new CDHouseSellingSpider();
-// let soldSpider = new CDHouseSoldSpider();
-// complexSpider.run();
-// sellingSpider.run();
-// soldSpider.run();
-// }
-
-// run();

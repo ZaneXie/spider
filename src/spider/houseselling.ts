@@ -5,13 +5,24 @@
 import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import {getDebugger} from "../util/debug";
+import {inject, injectable} from 'inversify';
+import {HouseManager, IHouseManager} from "../manager/house";
+import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("spider");
 
-export interface HouseSellingSpider {
+export interface IHouseSellingSpider {
     run();
 }
 
-export class CDHouseSellingSpider implements HouseSellingSpider {
+@injectable()
+export class CDHouseSellingSpider implements IHouseSellingSpider {
+
+    private houseManager: IHouseManager;
+
+    public constructor(@inject(SERVICE_IDENTIFIER.HouseManager) houseManager: IHouseManager) {
+        this.houseManager = houseManager;
+    }
+
     async parse(houseId: string) {
         let url = "http://cd.lianjia.com/ershoufang/c" + houseId + "/";
         debug("parsing url: " + url);
@@ -42,7 +53,6 @@ export class CDHouseSellingSpider implements HouseSellingSpider {
                 id = match[1];
             }
             result.push({id, title, detail, where, totalPrice, unitPrice, visitorNum, url});
-           debug(result[1])
         });
         debug("get " + result.length + " elements.");
         return result;
@@ -56,9 +66,23 @@ export class CDHouseSellingSpider implements HouseSellingSpider {
         for (let idx:number = 0; idx < complexIDs.length; idx++) {
             jobs.push(this.parse(complexIDs[idx]).then((obj) => {
                 //TODO save info and mark complex done
+                let saveItems:{}[] = []
                 obj.forEach((item, index)=> {
-                    debug(item["id"] + "[" + index + "]");
+                    // debug(item["id"] + "[" + index + "]");
+                    saveItems.push({
+                        ljID: item['id'],
+                        url: item['url'],
+                        title: item['title'],
+                        complex: complexIDs[idx],
+                        location: item['loation'],
+                        area: item['area'],
+                        detail: item['detail'],
+                        totalprice: item['totalPrice'],
+                        unitprice: item['unitPrice'],
+                        visitornum: item['visitorNum'],
+                    });
                 });
+                this.houseManager.save(saveItems);
             }));
         }
         await Promise.all(jobs);

@@ -8,4 +8,6 @@ export const SERVICE_IDENTIFIER = {
     HouseManager:Symbol("HouseManager"),
     DataBase:Symbol("DataBase"),
     Sequelize:Symbol("Sequelize"),
+    CDHouseSellingSpider:Symbol("CDHouseSellingSpider"),
+    CDHouseSoldSpider:Symbol("CDHouseSoldSpider"),
 };
