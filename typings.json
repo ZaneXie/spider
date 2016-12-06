@@ -10,6 +10,7 @@
     "sequelize": "registry:npm/sequelize#3.0.0+20161101121248"
   },
   "globalDependencies": {
+    "fs-extra-promise": "registry:dt/fs-extra-promise#0.0.0+20160919071823",
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",
     "node": "registry:env/node#6.0.0+20161105011511",
     "request-promise": "registry:dt/request-promise#4.1.0+20161013074249",

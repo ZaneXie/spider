@@ -5,7 +5,7 @@
 import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import Bluebird = require('bluebird');
-import fs = require('fs');
+import fs = require('fs-extra-promise');
 import {getDebugger} from "../util/debug";
 let debug = getDebugger("spider");
 let csv: any = Bluebird.promisifyAll(require('csv'));
