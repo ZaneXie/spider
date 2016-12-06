@@ -11,6 +11,7 @@ import {Connection} from '~sequelize/index';
 import {IComplexManager, ComplexManager} from '../manager/complex';
 import {IComplexSpider, CDComplexSpider} from '../spider/complex';
 import {DataBase} from '../model/index';
+import {IHouseManager, HouseManager} from '../manager/House';
 
 let container = new Container();
 
@@ -18,6 +19,7 @@ let sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.pas
 
 container.bind<Connection>(SERVICE_IDENTIFIER.Sequelize).toConstantValue(sequelize);
 container.bind<IComplexManager>(SERVICE_IDENTIFIER.ComplexManager).to(ComplexManager);
+container.bind<IHouseManager>(SERVICE_IDENTIFIER.HouseManager).to(HouseManager);
 container.bind<IComplexSpider>(SERVICE_IDENTIFIER.ComplexSpider).to(CDComplexSpider);
 container.bind<DataBase>(SERVICE_IDENTIFIER.DataBase).to(DataBase);
 
