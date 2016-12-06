@@ -9,7 +9,7 @@ import {Model} from "~sequelize/index";
 export interface ComplexAttribute extends Base {
     ljID?: string;
     url?: string;
-    price?: number;
+    name?: string;
 }
 
 export interface ComplexInstance extends Sequelize.Instance<ComplexInstance, ComplexAttribute>, ComplexAttribute {
@@ -18,9 +18,9 @@ export interface ComplexInstance extends Sequelize.Instance<ComplexInstance, Com
 
 export const define = (sequelize): Model<ComplexInstance, ComplexAttribute> => {
     let complex = sequelize.define("complex", {
-        ljID: DataTypes.STRING(10),
+        ljID: DataTypes.STRING(32),
         url: DataTypes.STRING(512),
-        price: DataTypes.INTEGER
+        string: DataTypes.STRING(512)
     })
 
     return complex;

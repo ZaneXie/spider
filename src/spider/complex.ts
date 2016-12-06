@@ -6,8 +6,8 @@ import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import Bluebird = require('bluebird');
 import {getDebugger} from "../util/debug";
+import {ComplexManager} from "../manager/complex";
 let debug = getDebugger("spider");
-let csv: any = Bluebird.promisifyAll(require('csv'));
 
 export interface ComplexSpider {
     run();
@@ -40,16 +40,16 @@ export class CDComplexSpider implements ComplexSpider {
     private thread: number = 1;
 
     private async realRun() {
-        if (this.i > this.totalPage) {
-            // debug("writing files...");
-            // fs.writeFileSync("D:\\1234.csv", result, "utf-8");
-            // debug("done");
+        if (this.i > this.totalPage){
             return;
         }
         let jobs: Promise<any>[] = [];
         for (let k = 0; k < this.thread && this.i <= this.totalPage; k++, this.i++) {
-            jobs.push(this.parse(this.i).then(csv.stringifyAsync).then((line) => {
-                // result += line;
+            jobs.push(this.parse(this.i).then((obj) => {
+                let CM = new ComplexManager();
+                obj.forEach((item, index)=> {
+                    CM.save({ljID:item["id"], url:item["url"], name:item["where"]});
+                });
             }));
         }
         await Promise.all(jobs);
