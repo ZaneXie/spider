@@ -8,6 +8,7 @@ import {getDebugger} from "../util/debug";
 import {inject, injectable} from 'inversify';
 import {HouseManager, IHouseManager} from "../manager/house";
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
+import {IComplexManager} from '../manager/complex';
 let debug = getDebugger("spider");
 
 export interface IHouseSellingSpider {
@@ -18,9 +19,12 @@ export interface IHouseSellingSpider {
 export class CDHouseSellingSpider implements IHouseSellingSpider {
 
     private houseManager: IHouseManager;
+    private complexManager: IComplexManager;
 
-    public constructor(@inject(SERVICE_IDENTIFIER.HouseManager) houseManager: IHouseManager) {
+    public constructor(@inject(SERVICE_IDENTIFIER.HouseManager) houseManager: IHouseManager,
+                       @inject(SERVICE_IDENTIFIER.ComplexManager) complexManager: IComplexManager) {
         this.houseManager = houseManager;
+        this.complexManager = complexManager;
     }
 
     async parse(complexID: string) {
@@ -28,7 +32,7 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
         debug("parsing url: " + url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
-        let result:{}[] = [];
+        let result: {}[] = [];
         $(".main-box .house-lst li").each(function (key, ele) {
             let title = $(ele).find("h2 a").text().trim();
             let where = $(ele).find(".where a span").text().trim();
@@ -63,34 +67,38 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
                 area = match_area[0];
             }
             let house = {
-                    lj_id: id,
-                    url: url,
-                    title: title,
-                    complex_id: complexID,
-                    layout: layout,
-                    area: area,
-                    location: location,
-                    total_price: totalPrice,
-                    unit_price: unitPrice,
-                    visitor_num: visitorNum,
-                    detail: detail,
-                };
+                lj_id      : id,
+                url        : url,
+                title      : title,
+                complex_id : complexID,
+                layout     : layout,
+                area       : area,
+                location   : location,
+                total_price: totalPrice,
+                unit_price : unitPrice,
+                visitor_num: visitorNum,
+                detail     : detail,
+            };
             result.push(house);
         });
         return result;
     }
 
     private async realRun() {
-        let complexIDs:string[] = [];
-        let jobs: Promise<any>[] = [];
-        //TODO: Get complex IDs from database.
-        complexIDs.push("3011053205624");
-        for (let idx:number = 0; idx < complexIDs.length; idx++) {
-            jobs.push(this.parse(complexIDs[idx]).then((obj) => {
-                this.houseManager.save(obj);
-            }));
+        let date = new Date();
+        while (true) {
+            let complexes = await this.complexManager.getComplexesToBeUpdated(date);
+            if (complexes.length === 0) {
+                break;
+            }
+            let jobs: Promise<any>[] = [];
+            for (let complex of complexes) {
+                jobs.push(this.parse(complex.lj_id).then((houses) => {
+                    return this.houseManager.save(houses);
+                }));
+            }
+            await Promise.all(jobs);
         }
-        await Promise.all(jobs);
     }
 
     public run() {

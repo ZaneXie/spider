@@ -15,6 +15,8 @@ import Bluebird = require('bluebird');
 export interface IComplexManager {
     save(complex: ComplexAttribute): Bluebird<ComplexInstance[]>;
     save(complexes: ComplexAttribute[]): Bluebird<ComplexInstance[]>;
+    getComplexesToBeUpdated(time: Date);
+    getComplexesToBeUpdated(time: Date, limit);
 }
 
 @injectable()
@@ -24,6 +26,29 @@ export class ComplexManager extends BaseManager<ComplexAttribute> implements ICo
     public constructor(@inject(SERVICE_IDENTIFIER.DataBase) database: DataBase) {
         super();
         this.database = database;
+    }
+
+    public getComplexesToBeUpdated(time: Date, limit: number = 10) {
+        return this.database.complex.findAll({
+            where: {
+                'updatedAt': {
+                    $lt: time
+                },
+                'type'     : 'default'
+
+            },
+            limit: limit,
+        }).then((records) => {
+            //todo: only need to update updatedAt fields
+            let ids = lodash.map(records, 'id');
+            return this.database.complex.update({
+                type: 'default'
+            }, {
+                where: {
+                    id: ids
+                }
+            }).thenReturn(records);
+        });
     }
 
     public save(attributes: ComplexAttribute | ComplexAttribute[]): Bluebird<ComplexInstance[]> {
