@@ -30,8 +30,8 @@ let configSqlite =
 
 let configMysql = {
     database: 'spider',
-    username: 'root',
-    password: 'spider',
+    username: process.env['MYSQL_USERNAME'] ||'root',
+    password: process.env['MYSQL_PASSWORD'] ||'spider',
     option  : {
         host   : process.env['MYSQL_HOST'] || 'mysql',
         port   : parseInt(process.env['MYSQL_PORT']) || 3306,

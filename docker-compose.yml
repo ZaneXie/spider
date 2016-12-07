@@ -7,6 +7,12 @@ services:
     volumes:
       - .:/app
     command: node /app/src/server/index.js
+    environment:
+      - DATABASE_TYPE=mysql
+      - MYSQL_PASSWORD=spider
+      - MYSQL_USERNAME=root
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
 
   mysql:
     image: mysql
