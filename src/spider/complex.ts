@@ -39,7 +39,7 @@ export class CDComplexSpider implements IComplexSpider {
             if (match && match[0]) {
                 id = match[0];
             }
-            result.push({ljID: id, url, name: where});
+            result.push({lj_id:id, url:url, name: where});
         });
         debug("get " + result.length + " elements.");
         return result;

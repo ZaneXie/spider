@@ -8,18 +8,18 @@ import DataTypes = require('sequelize/lib/data-types');
 import {Model} from "~sequelize/index";
 export type HouseType = "house" | "revision";
 export interface HouseAttribute extends Base {
-    ljID?: string;
+    lj_id?: string;
     url?: string;
     title?: string;
-    complex?: string;
+    complex_id?: string;
     layout?: string;
     area?: number;
     location?: string;
-    totalprice?: number;
-    unitprice?: number;
-    visitornum?: number;
-    detail?: string;
+    total_price?: number;
+    unit_price?: number;
+    visitor_num?: number;
     type?: HouseType;
+    detail?: string;
 }
 
 export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAttribute>, HouseAttribute {
@@ -27,12 +27,12 @@ export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAt
 }
 
 let tableDefine = {
-    ljID: DataTypes.STRING(10),
+    lj_id: DataTypes.STRING(10),
     url: DataTypes.STRING(512),
     title: DataTypes.STRING(512),
     complex_id: DataTypes.STRING(512),
     layout: DataTypes.STRING(512),
-    area: DataTypes.STRING(512),
+    area: DataTypes.DOUBLE,
     location: DataTypes.STRING(512),
     total_price: DataTypes.INTEGER,
     unit_price: DataTypes.INTEGER,

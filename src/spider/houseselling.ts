@@ -34,8 +34,8 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
             let where = $(ele).find(".where a span").text().trim();
 
             let info = $(ele).find(".where span");
-            let layout = $(info.get(0)).find("span").text().trim();
-            let area = $(info.get(1)).find(("span")).text().trim();
+            let layout = $(info.get(1)).find("span").text().trim();
+            let area = $(info.get(3)).text().trim();
 
             let location = $(ele).find(".other .con a").text().trim();
             let detail = $(ele).find(".other .con").text().trim();
@@ -57,19 +57,25 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
             if (match_price && match_price[0]) {
                 unitPrice = match_price[0];
             }
-            result.push({
-                ljID: id,
-                url: url,
-                title: title,
-                complex_id: complexID,
-                layout: layout,
-                area: area,
-                location: location,
-                total_price: totalPrice,
-                unit_price: unitPrice,
-                visitor_num: visitorNum,
-                detail: detail,
-            });
+            let pattern_area = /(\d+\.?\d+)/
+            let match_area = pattern_area.exec(area);
+            if (match_area && match_area[0]) {
+                area = match_area[0];
+            }
+            let house = {
+                    lj_id: id,
+                    url: url,
+                    title: title,
+                    complex_id: complexID,
+                    layout: layout,
+                    area: area,
+                    location: location,
+                    total_price: totalPrice,
+                    unit_price: unitPrice,
+                    visitor_num: visitorNum,
+                    detail: detail,
+                };
+            result.push(house);
         });
         return result;
     }
