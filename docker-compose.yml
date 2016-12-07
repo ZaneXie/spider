@@ -2,6 +2,8 @@ version: '2'
 services:
   app:
     image: node:6
+    ports:
+      - "8091:3000"
     volumes:
       - .:/app
     command: node /app/src/server/index.js
