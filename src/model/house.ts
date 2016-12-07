@@ -27,7 +27,7 @@ export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAt
 }
 
 let tableDefine = {
-    lj_id      : DataTypes.STRING(10),
+    lj_id      : DataTypes.STRING(32),
     url        : DataTypes.STRING(512),
     title      : DataTypes.STRING(512),
     complex_id : DataTypes.STRING(512),

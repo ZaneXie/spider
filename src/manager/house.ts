@@ -7,13 +7,14 @@ import {BaseManager} from "./base";
 import {injectable, inject} from "inversify";
 import {DataBase} from '../model/index';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
-import {HouseAttribute} from '../model/house';
+import {HouseAttribute, HouseInstance} from '../model/house';
 let debug = getDebugger("manager");
 import lodash = require('lodash');
+import Bluebird = require('bluebird');
 
 export interface IHouseManager {
-    save(complex: HouseAttribute);
-    save(complexes: HouseAttribute[]);
+    save(complex: HouseAttribute): Bluebird<HouseInstance[]>;
+    save(complexes: HouseAttribute[]): Bluebird<HouseInstance[]>;
 }
 
 @injectable()
@@ -25,19 +26,21 @@ export class HouseManager extends BaseManager<HouseAttribute> implements IHouseM
         this.database = database;
     }
 
-    public save(attributes: HouseAttribute| HouseAttribute[]) {
+    public save(attributes: HouseAttribute| HouseAttribute[]): Bluebird<HouseInstance[]> {
         debug("saving house : %s", Array.isArray(attributes) ? "array " + attributes.length : attributes);
         if (!Array.isArray(attributes)) {
             return this.save([attributes]);
         }
         let ids = lodash.map(attributes, 'lj_id');
         // save old records as revision and insert new records
-        this.database.house.update({
+        return this.database.house.update({
             type: 'revision'
         }, {
             where: {lj_id: ids}
         }).then(() => {
-            this.database.house.bulkCreate(attributes);
+            return this.database.house.bulkCreate(attributes);
+        }).catch((error) => {
+            console.error(error);
         });
     }
 }
