@@ -6,6 +6,7 @@
     "cheerio": "registry:npm/cheerio#0.20.0+20160422172414",
     "debug": "registry:npm/debug#2.0.0+20160723033700",
     "lodash": "registry:npm/lodash#4.0.0+20161015015725",
+    "mysql": "registry:npm/mysql#2.11.1+20161114232222",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "sequelize": "registry:npm/sequelize#3.0.0+20161101121248"
   },
