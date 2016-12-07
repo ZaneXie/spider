@@ -33,8 +33,8 @@ let configMysql = {
     username: 'root',
     password: 'spider',
     option  : {
-        host   : 'mysql',
-        port   : 3306,
+        host   : process.env['MYSQL_HOST'] || 'mysql',
+        port   : parseInt(process.env['MYSQL_PORT']) || 3306,
         dialect: 'mysql',
         pool   : {
             max : 5,
@@ -43,7 +43,7 @@ let configMysql = {
         },
         define : {
             charset: 'utf8',
-        }
+        },
     }
 }
 
@@ -56,7 +56,9 @@ export function initMysql() {
         });
         connection.connect();
         let sql = 'create database if not exists ' + configMysql.database;
+        debug(sql);
         return connection.query(sql, (err, rows, fields) => {
+            console.log(err);
             if (!err) {
                 resolve(rows);
             } else {
@@ -66,5 +68,10 @@ export function initMysql() {
     })
 }
 
-export const dbConfig = configSqlite;
+let dbType = process.env['DATABASE_TYPE'] || 'sqlite';
+let config: any = configSqlite;
+if (dbType === "mysql") {
+    config = configMysql;
+}
+export const dbConfig = config;
 debug(dbConfig);
