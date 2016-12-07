@@ -6,7 +6,7 @@ import {Base} from "./index";
 import Sequelize = require('sequelize');
 import DataTypes = require('sequelize/lib/data-types');
 import {Model} from "~sequelize/index";
-export type HouseType = "house" | "revision";
+export type HouseType = "default" | "revision";
 export interface HouseAttribute extends Base {
     lj_id?: string;
     url?: string;
@@ -27,29 +27,32 @@ export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAt
 }
 
 let tableDefine = {
-    lj_id: DataTypes.STRING(10),
-    url: DataTypes.STRING(512),
-    title: DataTypes.STRING(512),
-    complex_id: DataTypes.STRING(512),
-    layout: DataTypes.STRING(512),
-    area: DataTypes.DOUBLE,
-    location: DataTypes.STRING(512),
+    lj_id      : DataTypes.STRING(10),
+    url        : DataTypes.STRING(512),
+    title      : DataTypes.STRING(512),
+    complex_id : DataTypes.STRING(512),
+    layout     : DataTypes.STRING(512),
+    area       : DataTypes.DOUBLE,
+    location   : DataTypes.STRING(512),
     total_price: DataTypes.INTEGER,
-    unit_price: DataTypes.INTEGER,
+    unit_price : DataTypes.INTEGER,
     visitor_num: DataTypes.INTEGER,
-    type: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-        defaultValue: "house",
+    type       : {
+        type        : DataTypes.ENUM<string>("default", "revision"),
+        allowNull   : false,
+        defaultValue: "default",
     },
-    detail: DataTypes.STRING(512)
+    detail     : DataTypes.STRING(512)
 };
 
 let index = {
-    indexes:[
+    indexes: [
         {
-            fields:['type']
-        }
+            fields: ['type']
+        },
+        {
+            fields: ['lj_id']
+        },
     ]
 };
 

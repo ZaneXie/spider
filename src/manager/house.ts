@@ -27,17 +27,17 @@ export class HouseManager extends BaseManager<HouseAttribute> implements IHouseM
 
     public save(attributes: HouseAttribute| HouseAttribute[]) {
         debug("saving house : %s", Array.isArray(attributes) ? "array " + attributes.length : attributes);
-        if (Array.isArray(attributes)) {
-            let ids = lodash.map(attributes, 'lj_id');
-            this.database.house.update({
-                type: 'revision'
-            }, {
-                where: {lj_id: ids}
-            }).then(()=>{
-                this.database.house.bulkCreate(attributes);
-            });
-        } else {
-            this.database.house.insertOrUpdate(attributes);
+        if (!Array.isArray(attributes)) {
+            return this.save([attributes]);
         }
+        let ids = lodash.map(attributes, 'lj_id');
+        // save old records as revision and insert new records
+        this.database.house.update({
+            type: 'revision'
+        }, {
+            where: {lj_id: ids}
+        }).then(() => {
+            this.database.house.bulkCreate(attributes);
+        });
     }
 }
