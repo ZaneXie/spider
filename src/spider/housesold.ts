@@ -50,7 +50,7 @@ export class CDHouseSoldSpider implements IHouseSoldSpider {
         for (let idx:number = 0; idx < complexIDs.length; idx++) {
             jobs.push(this.parse(complexIDs[idx]).then((obj) => {
                 obj.forEach((item, index)=> {
-                    debug(item["id"] + "[" + index + "]");
+                    // debug(item["id"] + "[" + index + "]");
                 });
                 //TODO save info and mark complex done.
             }));

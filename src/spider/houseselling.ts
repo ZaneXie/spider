@@ -23,27 +23,27 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
         this.houseManager = houseManager;
     }
 
-    async parse(houseId: string) {
-        let url = "http://cd.lianjia.com/ershoufang/c" + houseId + "/";
+    async parse(complexID: string) {
+        let url = "http://cd.lianjia.com/ershoufang/c" + complexID + "/";
         debug("parsing url: " + url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
         let result:{}[] = [];
         $(".main-box .house-lst li").each(function (key, ele) {
-            let title = $(ele).find("h2 a").text();
-            let where = $(ele).find(".where a span").text();
+            let title = $(ele).find("h2 a").text().trim();
+            let where = $(ele).find(".where a span").text().trim();
 
             let info = $(ele).find(".where span");
-            let layout = $(info.get(0)).find("span").text();
-            let area = $(info.get(1)).find(("span")).text();
+            let layout = $(info.get(0)).find("span").text().trim();
+            let area = $(info.get(1)).find(("span")).text().trim();
 
-            let location = $(ele).find(".other .con a").text();
-            let detail = $(ele).find(".other .con").text();
+            let location = $(ele).find(".other .con a").text().trim();
+            let detail = $(ele).find(".other .con").text().trim();
 
-            let totalPrice = $(ele).find(".price span").text();
-            let unitPrice = $(ele).find(".price-pre").text();
+            let totalPrice = $(ele).find(".price span").text().trim();
+            let unitPrice = $(ele).find(".price-pre").text().trim();
 
-            let visitorNum = $(ele).find(".square span").text();
+            let visitorNum = $(ele).find(".square span").text().trim();
 
             let url = $(ele).find(".info-panel h2 a").attr("href");
             let pattern = /.*\/(.*)\.html/
@@ -52,9 +52,25 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
             if (match && match[1]) {
                 id = match[1];
             }
-            result.push({id, title, detail, where, totalPrice, unitPrice, visitorNum, url});
+            let pattern_price = /(\d+)/
+            let match_price = pattern_price.exec(unitPrice);
+            if (match_price && match_price[0]) {
+                unitPrice = match_price[0];
+            }
+            result.push({
+                ljID: id,
+                url: url,
+                title: title,
+                complex_id: complexID,
+                layout: layout,
+                area: area,
+                location: location,
+                total_price: totalPrice,
+                unit_price: unitPrice,
+                visitor_num: visitorNum,
+                detail: detail,
+            });
         });
-        debug("get " + result.length + " elements.");
         return result;
     }
 
@@ -65,24 +81,7 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
         complexIDs.push("3011053205624");
         for (let idx:number = 0; idx < complexIDs.length; idx++) {
             jobs.push(this.parse(complexIDs[idx]).then((obj) => {
-                //TODO save info and mark complex done
-                let saveItems:{}[] = []
-                obj.forEach((item, index)=> {
-                    // debug(item["id"] + "[" + index + "]");
-                    saveItems.push({
-                        ljID: item['id'],
-                        url: item['url'],
-                        title: item['title'],
-                        complex: complexIDs[idx],
-                        location: item['loation'],
-                        area: item['area'],
-                        detail: item['detail'],
-                        totalprice: item['totalPrice'],
-                        unitprice: item['unitPrice'],
-                        visitornum: item['visitorNum'],
-                    });
-                });
-                this.houseManager.save(saveItems);
+                this.houseManager.save(obj);
             }));
         }
         await Promise.all(jobs);
