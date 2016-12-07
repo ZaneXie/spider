@@ -15,7 +15,7 @@ import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {Connection} from '~sequelize/index';
 let debug = getDebugger("spider");
 
-function main() {
+let main = async () => {
     let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
 
     process.on("exit", () => {
@@ -27,9 +27,9 @@ function main() {
     let sellingSpider = container.get<IHouseSellingSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
     let soldSpider = container.get<IHouseSoldSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     sequelize.sync();
-    complexSpider.run();
+    await complexSpider.run();
     sellingSpider.run();
-    soldSpider.run();
+    // soldSpider.run();
 }
 
 main();

@@ -27,12 +27,11 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
         this.complexManager = complexManager;
     }
 
-    async parse(complexID: string) {
-        let url = "http://cd.lianjia.com/ershoufang/c" + complexID + "/";
+    async realParse(url: string, complexID: string){
         debug("parsing url: " + url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
-        let result: {}[] = [];
+        let houses: {}[] = [];
         $(".main-box .house-lst li").each(function (key, ele) {
             let title = $(ele).find("h2 a").text().trim();
             let where = $(ele).find(".where a span").text().trim();
@@ -67,21 +66,41 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
                 area = match_area[0];
             }
             let house = {
-                lj_id      : id,
-                url        : url,
-                title      : title,
-                complex_id : complexID,
-                layout     : layout,
-                area       : area,
-                location   : location,
+                lj_id: id,
+                url: url,
+                title: title,
+                complex_id: complexID,
+                layout: layout,
+                area: area,
+                location: location,
                 total_price: totalPrice,
-                unit_price : unitPrice,
+                unit_price: unitPrice,
                 visitor_num: visitorNum,
-                detail     : detail,
+                detail: detail,
             };
-            result.push(house);
+            houses.push(house);
         });
-        return result;
+        return houses;
+    }
+
+    async parse(complexID: string) {
+        let url = "http://cd.lianjia.com/ershoufang/c" + complexID + "/";
+        let html = await requestPromise(url);
+        let $ = cheerio.load(html);
+        let totalPage = $(".page-box").attr("page-data").trim();
+        let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
+        if (totalPageNum >= 1) {
+            let jobs: Promise<any>[] = [];
+            for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
+                let realUrl = url + "pg" + pageNum;
+                jobs.push(this.realParse(realUrl, complexID).then((houses) => {
+                    if (houses.length > 0) {
+                        this.houseManager.save(houses);
+                    }
+                }));
+            }
+            await Promise.all(jobs);
+        }
     }
 
     private async realRun() {
@@ -93,15 +112,14 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
             }
             let jobs: Promise<any>[] = [];
             for (let complex of complexes) {
-                jobs.push(this.parse(complex.lj_id).then((houses) => {
-                    return this.houseManager.save(houses);
-                }));
+                jobs.push(this.parse(complex.lj_id));
             }
             await Promise.all(jobs);
         }
     }
 
     public run() {
+        debug("Start to run house selling spider...");
         this.realRun()
     }
 }

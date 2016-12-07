@@ -41,7 +41,6 @@ export class CDComplexSpider implements IComplexSpider {
             }
             result.push({lj_id:id, url:url, name: where});
         });
-        debug("get " + result.length + " elements.");
         return result;
     }
 
@@ -55,19 +54,16 @@ export class CDComplexSpider implements IComplexSpider {
         }
         let jobs: Promise<any>[] = [];
         for (let k = 0; k < this.thread && this.i <= this.totalPage; k++, this.i++) {
-            jobs.push(this.parse(this.i).then((obj) => {
-                this.complexManager.save(obj);
+            jobs.push(this.parse(this.i).then((complexes) => {
+                return this.complexManager.save(complexes);
             }));
         }
         await Promise.all(jobs);
         this.realRun();
     }
 
-    public run() {
-        this.i = 1;
-        this.totalPage = 1;
-        this.thread = 1;
-        this.realRun();
+    public async run() {
+        await this.realRun();
     }
 }
 
