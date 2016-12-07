@@ -4,7 +4,7 @@ services:
     image: node:6
     volumes:
       - .:/app
-    command: /app/wait-for-it/wait-for-it.sh mysql:3306 -- node /app/src/spider/index.js
+    command: node /app/src/spider/index.js
 
   mysql:
     image: mysql
