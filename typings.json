@@ -5,6 +5,7 @@
     "chai": "registry:npm/chai#3.5.0+20160723033700",
     "cheerio": "registry:npm/cheerio#0.20.0+20160422172414",
     "debug": "registry:npm/debug#2.0.0+20160723033700",
+    "express": "registry:npm/express#4.14.0+20160925001530",
     "lodash": "registry:npm/lodash#4.0.0+20161015015725",
     "mysql": "registry:npm/mysql#2.11.1+20161114232222",
     "request": "registry:npm/request#2.69.0+20160428223725",
