@@ -11,7 +11,7 @@ import {Connection} from '~sequelize/index';
 import {IComplexManager, ComplexManager} from '../manager/complex';
 import {IComplexSpider, CDComplexSpider} from '../spider/complex';
 import {DataBase} from '../model/index';
-import {IHouseManager, HouseManager} from '../manager/House';
+import {IHouseManager, HouseManager} from '../manager/house';
 import {CDHouseSellingSpider, IHouseSellingSpider} from "../spider/houseselling";
 import {CDHouseSoldSpider, IHouseSoldSpider} from "../spider/housesold";
 

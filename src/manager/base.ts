@@ -9,6 +9,9 @@ export abstract class BaseManager<T> {
     public constructor() {
     }
 
-    public save(record: T | T[]) {
+    public save(record: T);
+    public save(record: T[]);
+    public save(record: T|T[]) {
+
     }
 }

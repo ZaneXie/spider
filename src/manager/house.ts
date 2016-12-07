@@ -9,9 +9,11 @@ import {DataBase} from '../model/index';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {HouseAttribute} from '../model/house';
 let debug = getDebugger("manager");
+import lodash = require('lodash');
 
 export interface IHouseManager {
-    save(complex: HouseAttribute | HouseAttribute[]);
+    save(complex: HouseAttribute);
+    save(complexes: HouseAttribute[]);
 }
 
 @injectable()
@@ -26,7 +28,14 @@ export class HouseManager extends BaseManager<HouseAttribute> implements IHouseM
     public save(attributes: HouseAttribute| HouseAttribute[]) {
         debug("saving house : %s", Array.isArray(attributes) ? "array " + attributes.length : attributes);
         if (Array.isArray(attributes)) {
-            this.database.house.bulkCreate(attributes);
+            let ids = lodash.map(attributes, 'ljID');
+            this.database.house.update({
+                type: 'revision'
+            }, {
+                where: {ljID: ids}
+            }).then(()=>{
+                this.database.house.bulkCreate(attributes);
+            });
         } else {
             this.database.house.insertOrUpdate(attributes);
         }
