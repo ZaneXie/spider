@@ -13,9 +13,13 @@ import {IHouseSoldSpider} from "./housesold";
 import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {Connection} from '~sequelize/index';
+import {dbConfig, initMysql} from '../config/db';
 let debug = getDebugger("spider");
 
-let main = async () => {
+let main = async() => {
+    if (dbConfig.option.dialect === "mysql") {
+        await initMysql();
+    }
     let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
 
     process.on("exit", () => {
