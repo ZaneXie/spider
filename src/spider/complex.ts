@@ -10,7 +10,7 @@ import {IComplexManager} from "../manager/complex";
 import {inject, injectable} from 'inversify';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("spider");
-import {BaseSpider} from './base'
+import {BaseSpider, SpiderEvents} from './base'
 
 @injectable()
 export class CDComplexSpider extends BaseSpider {
@@ -28,6 +28,7 @@ export class CDComplexSpider extends BaseSpider {
 
     public async parsePromise(url: string): Promise<{}[]>{
         debug("parsing url: " + url);
+        this.Event.emit(SpiderEvents.Parsing, url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
         let result: {}[] = [];

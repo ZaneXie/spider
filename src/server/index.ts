@@ -13,7 +13,7 @@ import {IMiddleware} from 'koa-router';
 import {IRouterContext} from 'koa-router';
 let router = new KoaRouter();
 let app = new Koa();
-import {IBaseSpider} from "../spider/base";
+import {IBaseSpider, SpiderEvents} from "../spider/base";
 import {getLogger} from '../config/log';
 let debug = getDebugger("server");
 let logger = getLogger();
@@ -33,6 +33,10 @@ async function init() {
     let sellingSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
     let soldSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     await sequelize.sync();
+
+    complexSpider.Event.on(SpiderEvents.Parsing, (args) => {
+        console.log(args);
+    });
 
     router.get('/', function *(this: IRouterContext, next) {
         this.body = "ok";
