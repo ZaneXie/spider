@@ -4,3 +4,4 @@ typings
 *.js.map
 .idea
 sqlite.db
+app.log

@@ -16,6 +16,7 @@
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",
     "node": "registry:env/node#6.0.0+20161105011511",
     "request-promise": "registry:dt/request-promise#4.1.0+20161013074249",
-    "sqlite3": "registry:dt/sqlite3#2.2.3+20160724070935"
+    "sqlite3": "registry:dt/sqlite3#2.2.3+20160724070935",
+    "winston": "registry:dt/winston#0.0.0+20161108133445"
   }
 }
