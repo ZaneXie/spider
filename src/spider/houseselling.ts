@@ -9,26 +9,34 @@ import {inject, injectable} from 'inversify';
 import {HouseManager, IHouseManager} from "../manager/house";
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {IComplexManager} from '../manager/complex';
+import {BaseSpider} from "./base";
 let debug = getDebugger("spider");
 
-export interface IHouseSellingSpider {
-    run();
-}
 
 @injectable()
-export class CDHouseSellingSpider implements IHouseSellingSpider {
-
-    private houseManager: IHouseManager;
-    private complexManager: IComplexManager;
+export class CDHouseSellingSpider extends BaseSpider{
 
     public constructor(@inject(SERVICE_IDENTIFIER.HouseManager) houseManager: IHouseManager,
                        @inject(SERVICE_IDENTIFIER.ComplexManager) complexManager: IComplexManager) {
+        super();
         this.houseManager = houseManager;
         this.complexManager = complexManager;
+        this.curDate = new Date();
     }
 
-    async realParse(url: string, complexID: string){
+    private houseManager: IHouseManager;
+    private complexManager: IComplexManager;
+    private curDate: Date;
+    private targetUrls: string[] = [];
+
+    public async parsePromise(url: string){
         debug("parsing url: " + url);
+        let complexID = ""
+        let pattern_complex= /(\d{8,})/
+        let match_complex = pattern_complex.exec(url);
+        if (match_complex && match_complex[0]) {
+            complexID = match_complex[0];
+        }
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
         let houses: {}[] = [];
@@ -83,44 +91,42 @@ export class CDHouseSellingSpider implements IHouseSellingSpider {
         return houses;
     }
 
-    async parse(complexID: string) {
+    public getNextUrl(): string {
+        let url = "";
+        if (this.targetUrls.length > 0){
+            url = this.targetUrls[this.targetUrls.length - 1];
+            this.targetUrls.pop();
+        }
+        return url;
+    }
+
+    public async hasTask(): Promise<boolean> {
+        await this.updateUrlsFromDB();
+        return this.targetUrls.length > 0;
+    }
+
+    public saveToDB(houses: {}[]) {
+        return this.houseManager.save(houses);
+    }
+
+    private async updateUrlsFromDB(){
+        let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate, 1);
+        let jobs: Promise<any>[] = [];
+        for (let complex of complexes) {
+            jobs.push(this.parsePage(complex.lj_id));
+        }
+        await Promise.all(jobs);
+    }
+
+    async parsePage(complexID: string) {
         let url = "http://cd.lianjia.com/ershoufang/c" + complexID + "/";
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
         let totalPage = $(".page-box").attr("page-data").trim();
         let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
-        if (totalPageNum >= 1) {
-            let jobs: Promise<any>[] = [];
-            for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
-                let realUrl = url + "pg" + pageNum;
-                jobs.push(this.realParse(realUrl, complexID).then((houses) => {
-                    if (houses.length > 0) {
-                        this.houseManager.save(houses);
-                    }
-                }));
-            }
-            await Promise.all(jobs);
+        for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
+            this.targetUrls.push(url + "pg" + pageNum);
         }
-    }
-
-    private async realRun() {
-        let date = new Date();
-        while (true) {
-            let complexes = await this.complexManager.getComplexesToBeUpdated(date);
-            if (complexes.length === 0) {
-                break;
-            }
-            let jobs: Promise<any>[] = [];
-            for (let complex of complexes) {
-                jobs.push(this.parse(complex.lj_id));
-            }
-            await Promise.all(jobs);
-        }
-    }
-
-    public run() {
-        debug("Start to run house selling spider...");
-        this.realRun()
     }
 }
 

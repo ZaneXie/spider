@@ -7,17 +7,14 @@ import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {getDebugger} from '../util/debug';
 import {Connection} from '~sequelize/index';
-import {IComplexSpider} from '../spider/complex';
-import {IHouseSellingSpider} from '../spider/houseselling';
-import {IHouseSoldSpider} from '../spider/housesold';
 import Koa = require('koa');
 import KoaRouter = require('koa-router');
 import {IMiddleware} from 'koa-router';
 import {IRouterContext} from 'koa-router';
 let router = new KoaRouter();
 let app = new Koa();
+import {IBaseSpider} from "../spider/base";
 let debug = getDebugger("server");
-
 async function init() {
     if (dbConfig.option.dialect === "mysql") {
         await initMysql();
@@ -29,9 +26,9 @@ async function init() {
         sequelize.sync();
     });
 
-    let complexSpider = container.get<IComplexSpider>(SERVICE_IDENTIFIER.ComplexSpider);
-    let sellingSpider = container.get<IHouseSellingSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
-    let soldSpider = container.get<IHouseSoldSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
+    let complexSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.ComplexSpider);
+    let sellingSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
+    let soldSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     await sequelize.sync();
 
     router.get('/', function *(this:IRouterContext, next) {
@@ -45,7 +42,7 @@ async function init() {
         yield next;
     });
 
-    router.get('/spider/selling', function *(this:IRouterContext,next)  {
+    router.get('/spider/selling', function *(this:IRouterContext,next) {
         yield sellingSpider.run();
         this.body = "done";
         yield next;

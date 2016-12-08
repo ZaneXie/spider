@@ -6,26 +6,27 @@ import requestPromise = require("request-promise");
 import cheerio = require("cheerio");
 import Bluebird = require('bluebird');
 import {getDebugger} from "../util/debug";
-import {ComplexManager, IComplexManager} from "../manager/complex";
+import {IComplexManager} from "../manager/complex";
 import {inject, injectable} from 'inversify';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("spider");
-
-export interface IComplexSpider {
-    run();
-}
+import {BaseSpider} from './base'
 
 @injectable()
-export class CDComplexSpider implements IComplexSpider {
+export class CDComplexSpider extends BaseSpider {
 
     private complexManager: IComplexManager;
+    private targetUrls;
+    private totalPageNum:number = 10;
+    private nextPageNum:number = 0;
 
     public constructor(@inject(SERVICE_IDENTIFIER.ComplexManager) complexManager: IComplexManager) {
+        super();
         this.complexManager = complexManager;
+        this.targetUrls = this.targetUrlsMaker();
     }
 
-    async parse(pageNum: number) {
-        let url = "http://cd.lianjia.com/ershoufang/pg" + pageNum + "/";
+    public async parsePromise(url: string): Promise<{}[]>{
         debug("parsing url: " + url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
@@ -44,26 +45,22 @@ export class CDComplexSpider implements IComplexSpider {
         return result;
     }
 
-    private i: number = 1;
-    private totalPage: number = 1;
-    private thread: number = 1;
-
-    private async realRun() {
-        if (this.i > this.totalPage) {
-            return;
+    public getNextUrl():string {
+        return this.targetUrls.next()['value'];
+    }
+    private* targetUrlsMaker():IterableIterator<string>{
+        while (this.nextPageNum++ <= this.totalPageNum){
+            yield  "http://cd.lianjia.com/ershoufang/pg" + this.nextPageNum + "/";
         }
-        let jobs: Promise<any>[] = [];
-        for (let k = 0; k < this.thread && this.i <= this.totalPage; k++, this.i++) {
-            jobs.push(this.parse(this.i).then((complexes) => {
-                return this.complexManager.save(complexes);
-            }));
-        }
-        await Promise.all(jobs);
-        this.realRun();
     }
 
-    public async run() {
-        await this.realRun();
+    public saveToDB(complexes: {}[]){
+        return this.complexManager.save(complexes);
+    }
+
+    public async hasTask(): Promise<boolean>{
+        return this.nextPageNum < this.totalPageNum;
     }
 }
+
 
