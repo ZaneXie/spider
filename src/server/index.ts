@@ -2,7 +2,6 @@
  * Created by xiezongjun on 2016-12-07.
  */
 
-import express = require('express');
 import {dbConfig, initMysql} from '../config/db';
 import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
@@ -11,7 +10,12 @@ import {Connection} from '~sequelize/index';
 import {IComplexSpider} from '../spider/complex';
 import {IHouseSellingSpider} from '../spider/houseselling';
 import {IHouseSoldSpider} from '../spider/housesold';
-let app = express();
+import Koa = require('koa');
+import KoaRouter = require('koa-router');
+import {IMiddleware} from 'koa-router';
+import {IRouterContext} from 'koa-router';
+let router = new KoaRouter();
+let app = new Koa();
 let debug = getDebugger("server");
 
 async function init() {
@@ -30,28 +34,33 @@ async function init() {
     let soldSpider = container.get<IHouseSoldSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     await sequelize.sync();
 
-    app.get('/', (req, res) => {
-        res.send('OK!');
+    router.get('/', function *(this:IRouterContext, next) {
+        this.body = "ok";
+        yield next;
     });
 
-    app.get('/spider/complex', (req, res) => {
-        complexSpider.run();
-        res.send('done');
+    router.get('/spider/complex', function *(this:IRouterContext,next) {
+        yield complexSpider.run();
+        this.body = "done";
+        yield next;
     });
 
-    app.get('/spider/selling', (req, res) => {
-        sellingSpider.run();
-        res.send('done');
+    router.get('/spider/selling', function *(this:IRouterContext,next)  {
+        yield sellingSpider.run();
+        this.body = "done";
+        yield next;
     });
 
-    app.get('/spider/sold', (req, res) => {
-        soldSpider.run();
-        res.send('done');
+    router.get('/spider/sold',  function *(this:IRouterContext,next) {
+        yield soldSpider.run();
+        this.body = "done";
+        yield next
     });
 
     app.listen(3000, () => {
         console.log('server started!')
     });
+    app.use(router.routes())
 }
 
 init();

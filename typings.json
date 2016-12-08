@@ -5,13 +5,14 @@
     "chai": "registry:npm/chai#3.5.0+20160723033700",
     "cheerio": "registry:npm/cheerio#0.20.0+20160422172414",
     "debug": "registry:npm/debug#2.0.0+20160723033700",
-    "express": "registry:npm/express#4.14.0+20160925001530",
+    "koa": "registry:npm/koa#2.0.0+20161018080506",
     "lodash": "registry:npm/lodash#4.0.0+20161015015725",
     "mysql": "registry:npm/mysql#2.11.1+20161114232222",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "sequelize": "registry:npm/sequelize#3.0.0+20161101121248"
   },
   "globalDependencies": {
+    "koa-router": "registry:dt/koa-router#7.0.0+20160907102352",
     "mocha": "registry:dt/mocha#2.2.5+20161028141524",
     "node": "registry:env/node#6.0.0+20161105011511",
     "request-promise": "registry:dt/request-promise#4.1.0+20161013074249",
