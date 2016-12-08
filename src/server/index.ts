@@ -38,6 +38,24 @@ async function init() {
         console.log(args);
     });
 
+    complexSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
+        console.log(args);
+    });
+
+    sellingSpider.Event.on(SpiderEvents.Parsing, (args) => {
+        console.log(args);
+    });
+    sellingSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
+        console.log(args);
+    });
+
+    soldSpider.Event.on(SpiderEvents.Parsing, (args) => {
+        console.log(args);
+    });
+    soldSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
+        console.log(args);
+    });
+
     router.get('/', function *(this: IRouterContext, next) {
         this.body = "ok";
         yield next;

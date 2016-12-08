@@ -33,13 +33,13 @@ let main = async() => {
     // while (await complexSpider.hasTask()) {
     //     jobs.push(complexSpider.run());
     // }
-    while (await sellingSpider.hasTask()) {
-        jobs.push(sellingSpider.run());
-    }
-
-    // while (await soldSpider.hasTask()) {
-    //     jobs.push(soldSpider.run());
+    // while (await sellingSpider.hasTask()) {
+    //     jobs.push(sellingSpider.run());
     // }
+
+    while (await soldSpider.hasTask()) {
+        jobs.push(soldSpider.run());
+    }
     await Promise.all(jobs);
     debug("done!");
 };

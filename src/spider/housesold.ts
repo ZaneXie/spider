@@ -7,7 +7,7 @@ import cheerio = require("cheerio");
 import {getDebugger} from "../util/debug";
 let debug = getDebugger("spider");
 import {inject, injectable} from 'inversify';
-import {BaseSpider} from "./base";
+import {BaseSpider, SpiderEvents} from "./base";
 import {SERVICE_IDENTIFIER} from "../constants/ioc";
 import {IHouseManager} from "../manager/house";
 import {IComplexManager} from "../manager/complex";
@@ -30,7 +30,7 @@ export class CDHouseSoldSpider extends BaseSpider {
     private targetUrls: string[] = [];
 
     async parsePromise(url: string) {
-        debug("parsing url: " + url);
+        this.Event.emit(SpiderEvents.Parsing, url);
         let complexID = "";
         let pattern_complex= /(\d{8,})/
         let match_complex = pattern_complex.exec(url);
@@ -42,6 +42,9 @@ export class CDHouseSoldSpider extends BaseSpider {
         let houses:{}[] = [];
         $(".main-box .clinch-list li").each(function (key, ele) {
             let title = $(ele).find("h2 a").text();
+            if (!title) {
+                title = $(ele).find(".info-panel h2 div").text();
+            }
             let infos = $(ele).find(".div-cun");
             let time = $(infos.get(0)).text();
             let price = $(infos.get(1)).text();
@@ -78,19 +81,13 @@ export class CDHouseSoldSpider extends BaseSpider {
                 visitor_num: 0,
                 detail: detail,
             };
-            debug(house);
             houses.push(house);
         });
         return houses;
     }
 
-    public getNextUrl(): string {
-        let url = "";
-        if (this.targetUrls.length > 0){
-            url = this.targetUrls[this.targetUrls.length - 1];
-            this.targetUrls.pop();
-        }
-        return url;
+    public getNextUrl(): string|undefined {
+        return this.targetUrls.pop();
     }
 
     public async hasTask(): Promise<boolean> {
@@ -99,8 +96,7 @@ export class CDHouseSoldSpider extends BaseSpider {
     }
 
     public saveToDB(houses: {}[]) {
-        // return this.houseManager.save(houses);
-        debug("save: " + houses);
+        return this.houseManager.save(houses);
     }
 
     private async updateUrlsFromDB(){
@@ -121,5 +117,6 @@ export class CDHouseSoldSpider extends BaseSpider {
         for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
             this.targetUrls.push(url + "pg" + pageNum);
         }
+        this.Event.emit(SpiderEvents.TargetUrlChange, this.targetUrls);
     }
 }

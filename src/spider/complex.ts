@@ -12,6 +12,7 @@ import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("spider");
 import {BaseSpider, SpiderEvents} from './base'
 
+
 @injectable()
 export class CDComplexSpider extends BaseSpider {
 
@@ -27,7 +28,6 @@ export class CDComplexSpider extends BaseSpider {
     }
 
     public async parsePromise(url: string): Promise<{}[]>{
-        debug("parsing url: " + url);
         this.Event.emit(SpiderEvents.Parsing, url);
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
@@ -46,7 +46,7 @@ export class CDComplexSpider extends BaseSpider {
         return result;
     }
 
-    public getNextUrl():string {
+    public getNextUrl():string|undefined {
         return this.targetUrls.next()['value'];
     }
     private* targetUrlsMaker():IterableIterator<string>{

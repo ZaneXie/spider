@@ -5,6 +5,7 @@ import {injectable} from 'inversify';
 import {getDebugger} from "../util/debug";
 import {EventEmitter} from 'events';
 let debug = getDebugger("spider");
+import {getLogger} from "../config/log";
 
 export const SpiderEvents = {
     TargetUrlChange: 'TargetUrlChange',
@@ -19,19 +20,24 @@ export interface IBaseSpider {
 @injectable()
 export abstract class BaseSpider implements IBaseSpider {
     public Event: EventEmitter;
-
+    public Logger;
     public constructor() {
         this.Event = new EventEmitter();
+        this.Logger = getLogger();
     }
 
     public async run() {
-        await this.hasTask();
-        await this.parsePromise(this.getNextUrl()).then((objs) => {
-            return this.saveToDB(objs);
-        });
+        if (await this.hasTask()) {
+            let currUrl = this.getNextUrl();
+            if (currUrl) {
+                this.parsePromise(currUrl).then((objs) => {
+                    this.saveToDB(objs);
+                });
+            }
+        }
     }
 
-    public abstract getNextUrl(): string;
+    public abstract getNextUrl(): string|undefined;
 
     public abstract async hasTask(): Promise<boolean>;
 
