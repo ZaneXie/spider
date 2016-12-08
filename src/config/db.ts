@@ -30,8 +30,8 @@ let configSqlite =
 
 let configMysql = {
     database: 'spider',
-    username: process.env['MYSQL_USERNAME'] ||'root',
-    password: process.env['MYSQL_PASSWORD'] ||'spider',
+    username: process.env['MYSQL_USERNAME'] || 'root',
+    password: process.env['MYSQL_PASSWORD'] || 'spider',
     option  : {
         host   : process.env['MYSQL_HOST'] || 'mysql',
         port   : parseInt(process.env['MYSQL_PORT']) || 3306,
@@ -49,22 +49,31 @@ let configMysql = {
 
 export function initMysql() {
     return new Promise((resolve, reject) => {
-        let connection = mysql.createConnection({
-            host    : configMysql.option.host,
-            user    : configMysql.username,
-            password: configMysql.password,
-        });
-        connection.connect();
-        let sql = 'create database if not exists ' + configMysql.database;
-        debug(sql);
-        return connection.query(sql, (err, rows, fields) => {
-            console.log(err);
-            if (!err) {
-                resolve(rows);
-            } else {
-                reject(err);
-            }
-        })
+        let tryConnect = () => {
+            let connection = mysql.createConnection({
+                host    : configMysql.option.host,
+                user    : configMysql.username,
+                password: configMysql.password,
+            });
+            connection.connect((err) => {
+                if (err) {
+                    debug('connect failed, wait for 1000ms and retry');
+                    setTimeout(tryConnect, 1000);
+                    return;
+                }
+                let sql = 'create database if not exists ' + configMysql.database;
+                debug(sql);
+                return connection.query(sql, (err, rows, fields) => {
+                    console.log(err);
+                    if (!err) {
+                        resolve(rows);
+                    } else {
+                        reject(err);
+                    }
+                })
+            });
+        };
+        tryConnect();
     })
 }
 
