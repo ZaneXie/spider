@@ -11,6 +11,12 @@ export const SpiderEvents = {
     TargetUrlChange: 'TargetUrlChange',
     Parsing        : 'Parsing',
 }
+
+export const SpiderEventsType = {
+    Complex: 'Complex',
+    Selling: 'Selling',
+    Sold   : 'Sold',
+}
 export interface IBaseSpider {
     Event: EventEmitter;
     run();
@@ -21,6 +27,7 @@ export interface IBaseSpider {
 export abstract class BaseSpider implements IBaseSpider {
     public Event: EventEmitter;
     public Logger;
+
     public constructor() {
         this.Event = new EventEmitter();
         this.Logger = getLogger();

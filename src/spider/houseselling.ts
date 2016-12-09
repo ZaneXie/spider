@@ -9,7 +9,7 @@ import {inject, injectable} from 'inversify';
 import {HouseManager, IHouseManager} from "../manager/house";
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {IComplexManager} from '../manager/complex';
-import {BaseSpider, SpiderEvents} from "./base";
+import {BaseSpider, SpiderEvents, SpiderEventsType} from "./base";
 let debug = getDebugger("spider");
 
 
@@ -29,7 +29,7 @@ export class CDHouseSellingSpider extends BaseSpider{
     private targetUrls: string[] = [];
 
     public async parsePromise(url: string){
-        this.Event.emit(SpiderEvents.Parsing, url);
+        this.Event.emit(SpiderEvents.Parsing,SpiderEventsType.Selling, url);
         let complexID = ""
         let pattern_complex= /(\d{8,})/
         let match_complex = pattern_complex.exec(url);
@@ -124,7 +124,7 @@ export class CDHouseSellingSpider extends BaseSpider{
         for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
             this.targetUrls.push(url + "pg" + pageNum);
         }
-        this.Event.emit(SpiderEvents.TargetUrlChange, this.targetUrls);
+        this.Event.emit(SpiderEvents.TargetUrlChange, SpiderEventsType.Selling, this.targetUrls);
     }
 }
 

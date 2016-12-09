@@ -15,6 +15,7 @@ let router = new KoaRouter();
 let app = new Koa();
 import {IBaseSpider, SpiderEvents} from "../spider/base";
 import {getLogger} from '../config/log';
+import IO = require('socket.io');
 let debug = getDebugger("server");
 let logger = getLogger();
 async function init() {
@@ -33,28 +34,6 @@ async function init() {
     let sellingSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSellingSpider);
     let soldSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     await sequelize.sync();
-
-    complexSpider.Event.on(SpiderEvents.Parsing, (args) => {
-        console.log(args);
-    });
-
-    complexSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
-        console.log(args);
-    });
-
-    sellingSpider.Event.on(SpiderEvents.Parsing, (args) => {
-        console.log(args);
-    });
-    sellingSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
-        console.log(args);
-    });
-
-    soldSpider.Event.on(SpiderEvents.Parsing, (args) => {
-        console.log(args);
-    });
-    soldSpider.Event.on(SpiderEvents.TargetUrlChange, (args) => {
-        console.log(args);
-    });
 
     router.get('/', function *(this: IRouterContext, next) {
         this.body = "ok";
@@ -85,10 +64,48 @@ async function init() {
         yield next
     });
 
-    app.listen(3000, () => {
+    let server = require('http').createServer(app.callback());
+    server.listen(3000, () => {
+        // app.listen(3000, () => {
+        //     console.log(app.server);
         logger.info('server started at port 3000!')
     });
+    let io = IO(server);
+    io.on('connection', function (socket) {
+        socket.emit('news', {hello: 'world'});
+        socket.on('my other event', function (data) {
+            console.log(data);
+        });
+    });
     app.use(router.routes())
+
+    complexSpider.Event.on(SpiderEvents.Parsing, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.Parsing, args);
+    });
+
+    complexSpider.Event.on(SpiderEvents.TargetUrlChange, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.TargetUrlChange, args);
+    });
+
+    sellingSpider.Event.on(SpiderEvents.Parsing, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.Parsing, args);
+    });
+    sellingSpider.Event.on(SpiderEvents.TargetUrlChange, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.TargetUrlChange, args);
+    });
+
+    soldSpider.Event.on(SpiderEvents.Parsing, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.Parsing, args);
+    });
+    soldSpider.Event.on(SpiderEvents.TargetUrlChange, (...args) => {
+        logger.info(JSON.stringify(args));
+        io.emit(SpiderEvents.TargetUrlChange, args);
+    });
 }
 
 init();
