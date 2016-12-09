@@ -21,7 +21,6 @@ export class CDHouseSellingSpider extends BaseSpider{
         super();
         this.houseManager = houseManager;
         this.complexManager = complexManager;
-        this.curDate = new Date();
     }
 
     private houseManager: IHouseManager;
@@ -105,6 +104,9 @@ export class CDHouseSellingSpider extends BaseSpider{
     }
 
     private async updateUrlsFromDB(){
+        if (!this.curDate) {
+            this.curDate = new Date();
+        }
         let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate, 1);
         let jobs: Promise<any>[] = [];
         for (let complex of complexes) {
