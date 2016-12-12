@@ -121,7 +121,7 @@ export class CDHouseSellingSpider extends BaseSpider{
         let $ = cheerio.load(html);
         let totalPage = $(".page-box").attr("page-data").trim();
         let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
-        for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
+        for (let pageNum = totalPageNum; pageNum > 0; pageNum--) {
             this.targetUrls.push(url + "pg" + pageNum);
         }
         this.Event.emit(SpiderEvents.TargetUrlChange, SpiderEventsType.Selling, this.targetUrls);

@@ -79,6 +79,7 @@ export class CDHouseSoldSpider extends BaseSpider {
                 unit_price: price,
                 visitor_num: 0,
                 detail: detail,
+                deal_date:time,
             };
             houses.push(house);
         });
@@ -116,7 +117,7 @@ export class CDHouseSoldSpider extends BaseSpider {
         let $ = cheerio.load(html);
         let totalPage = $(".page-box").attr("page-data").trim();
         let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
-        for (let pageNum = 1; pageNum <= totalPageNum; pageNum++) {
+        for (let pageNum = totalPageNum; pageNum > 0; pageNum--) {
             this.targetUrls.push(url + "pg" + pageNum);
         }
         this.Event.emit(SpiderEvents.TargetUrlChange, SpiderEventsType.Sold, this.targetUrls);

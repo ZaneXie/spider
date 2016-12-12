@@ -20,6 +20,7 @@ export interface HouseAttribute extends Base {
     visitor_num?: number;
     type?: HouseType;
     detail?: string;
+    deal_date?:Date;
 }
 
 export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAttribute>, HouseAttribute {
@@ -42,7 +43,8 @@ let tableDefine = {
         allowNull   : false,
         defaultValue: "default",
     },
-    detail     : DataTypes.STRING(512)
+    detail      : DataTypes.STRING(512),
+    deal_date   : DataTypes.DATE
 };
 
 let index = {
