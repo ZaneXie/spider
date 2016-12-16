@@ -10,25 +10,29 @@ import {IComplexManager} from "../manager/complex";
 import {inject, injectable} from 'inversify';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 let debug = getDebugger("spider");
-import {BaseSpider, SpiderEvents, SpiderEventsType} from './base'
+import {BaseSpider, SpiderEventsType, SpiderItem, SpiderItemStatus} from './base'
 
+
+class CDComplexItem implements SpiderItem{
+    id: any;
+    url: string;
+    status: any = SpiderItemStatus.Waiting;
+    percent: number = 0;
+}
 
 @injectable()
 export class CDComplexSpider extends BaseSpider {
 
     private complexManager: IComplexManager;
-    private targetUrls;
-    private totalPageNum:number = 10;
-    private nextPageNum:number = 0;
+    private totalPageNum:number = 100;
 
     public constructor(@inject(SERVICE_IDENTIFIER.ComplexManager) complexManager: IComplexManager) {
         super();
         this.complexManager = complexManager;
-        this.targetUrls = this.targetUrlsMaker();
     }
 
-    public async parsePromise(url: string): Promise<{}[]>{
-        this.Event.emit(SpiderEvents.Parsing, SpiderEventsType.Complex, url);
+    async parsePromise(spiderItem: SpiderItem): Promise<{}[]>{
+        let url = spiderItem.url;
         let html = await requestPromise(url);
         let $ = cheerio.load(html);
         let result: {}[] = [];
@@ -43,24 +47,34 @@ export class CDComplexSpider extends BaseSpider {
             }
             result.push({lj_id:id, url:url, name: where});
         });
+
         return result;
     }
 
-    public getNextUrl():string|undefined {
-        return this.targetUrls.next()['value'];
-    }
-    private* targetUrlsMaker():IterableIterator<string>{
-        while (this.nextPageNum++ <= this.totalPageNum){
-            yield  "http://cd.lianjia.com/ershoufang/pg" + this.nextPageNum + "/";
+    private genTargetItems(){
+        for (let i = this.totalPageNum; i > 0; i--) {
+            let item = new CDComplexItem();
+            item.id = i;
+            item.url = "http://cd.lianjia.com/ershoufang/pg" + i + "/";
+            this.allTargetItems.push(item);
+            this.currTargetItems.push(item);
         }
     }
 
-    public saveToDB(complexes: {}[]){
+    async prepareTargetItems() {
+        this.genTargetItems();
+    }
+
+    saveToDB(complexes: {}[]){
         return this.complexManager.save(complexes);
     }
 
-    public async hasTask(): Promise<boolean>{
-        return this.nextPageNum < this.totalPageNum;
+    notify(event: string, item: SpiderItem) {
+        this.Event.emit(event, SpiderEventsType.Complex, item.url);
+    }
+
+    public getSpiderEventType():string {
+        return SpiderEventsType.Complex;
     }
 }
 

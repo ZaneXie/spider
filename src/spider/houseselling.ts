@@ -9,8 +9,16 @@ import {inject, injectable} from 'inversify';
 import {HouseManager, IHouseManager} from "../manager/house";
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {IComplexManager} from '../manager/complex';
-import {BaseSpider, SpiderEvents, SpiderEventsType} from "./base";
+import {BaseSpider, SpiderEvents, SpiderEventsType, SpiderItem, SpiderItemStatus} from "./base";
 let debug = getDebugger("spider");
+
+
+class CDSellingItem implements SpiderItem{
+    id: any;
+    url: string;
+    status: any = SpiderItemStatus.Waiting;
+    percent: number = 0;
+}
 
 
 @injectable()
@@ -26,10 +34,9 @@ export class CDHouseSellingSpider extends BaseSpider{
     private houseManager: IHouseManager;
     private complexManager: IComplexManager;
     private curDate: Date;
-    private targetUrls: string[] = [];
 
-    public async parsePromise(url: string){
-        this.Event.emit(SpiderEvents.Parsing,SpiderEventsType.Selling, url);
+    public async parsePromise(spiderItem: SpiderItem){
+        let url = spiderItem.url
         let complexID = ""
         let pattern_complex= /(\d{8,})/
         let match_complex = pattern_complex.exec(url);
@@ -90,15 +97,6 @@ export class CDHouseSellingSpider extends BaseSpider{
         return houses;
     }
 
-    public getNextUrl(): string|undefined {
-        return this.targetUrls.pop();
-    }
-
-    public async hasTask(): Promise<boolean> {
-        await this.updateUrlsFromDB();
-        return this.targetUrls.length > 0;
-    }
-
     public saveToDB(houses: {}[]) {
         return this.houseManager.save(houses);
     }
@@ -107,7 +105,7 @@ export class CDHouseSellingSpider extends BaseSpider{
         if (!this.curDate) {
             this.curDate = new Date();
         }
-        let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate, 1);
+        let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate);
         let jobs: Promise<any>[] = [];
         for (let complex of complexes) {
             jobs.push(this.parsePage(complex.lj_id));
@@ -122,9 +120,20 @@ export class CDHouseSellingSpider extends BaseSpider{
         let totalPage = $(".page-box").attr("page-data").trim();
         let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
         for (let pageNum = totalPageNum; pageNum > 0; pageNum--) {
-            this.targetUrls.push(url + "pg" + pageNum);
+            let item = new CDSellingItem();
+            item.id = complexID + pageNum;
+            item.url = url + 'pg' + pageNum;
+            this.allTargetItems.push(item);
+            this.currTargetItems.push(item);
         }
-        this.Event.emit(SpiderEvents.TargetUrlChange, SpiderEventsType.Selling, this.targetUrls);
+    }
+
+    async prepareTargetItems() {
+        await this.updateUrlsFromDB();
+    }
+
+    getSpiderEventType() {
+        return SpiderEventsType.Selling;
     }
 }
 

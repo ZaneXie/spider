@@ -10,7 +10,7 @@ import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {Connection} from '~sequelize/index';
 import {dbConfig, initMysql} from '../config/db';
-import {IBaseSpider} from "./base";
+import {IBaseSpider, SpiderEvents} from "./base";
 import {getDebugger} from "../util/debug";
 let debug = getDebugger("spider");
 
@@ -30,18 +30,41 @@ let main = async() => {
     let soldSpider = container.get<IBaseSpider>(SERVICE_IDENTIFIER.CDHouseSoldSpider);
     sequelize.sync();
     let jobs: Promise<any>[] = [];
-    // while (await complexSpider.hasTask()) {
+    // await complexSpider.prepare();
+    // while (complexSpider.getCurrTargetItemsCount() > 0) {
     //     jobs.push(complexSpider.run());
     // }
-    // while (await sellingSpider.hasTask()) {
-    //     jobs.push(sellingSpider.run());
-    // }
-
-    while (await soldSpider.hasTask()) {
-        jobs.push(soldSpider.run());
+    await sellingSpider.prepare();
+    while (await sellingSpider.getCurrTargetItemsCount() > 0) {
+        jobs.push(sellingSpider.run());
     }
+
+    // while (await soldSpider.hasTask()) {
+    //     jobs.push(soldSpider.run());
+    // }
     await Promise.all(jobs);
     debug("done!");
+
+    complexSpider.Event.on(SpiderEvents.Parsing, (...args) => {
+        debug("parsing:" + args)
+    });
+
+    complexSpider.Event.on(SpiderEvents.Done, (...args) => {
+        debug("saved:" + args)
+    });
+
+    sellingSpider.Event.on(SpiderEvents.Parsing, (...args) => {
+        debug("parsing:" + args)
+    });
+
+    sellingSpider.Event.on(SpiderEvents.Done, (...args) => {
+        debug("saved:" + args)
+    });
+
+    sellingSpider.Event.on(SpiderEvents.TargetUrlChange, (...args) => {
+        debug("saved:" + args)
+    });
+
 };
 
 main();

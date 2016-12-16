@@ -7,11 +7,17 @@ import cheerio = require("cheerio");
 import {getDebugger} from "../util/debug";
 let debug = getDebugger("spider");
 import {inject, injectable} from 'inversify';
-import {BaseSpider, SpiderEvents, SpiderEventsType} from "./base";
+import {BaseSpider, SpiderEventsType, SpiderItem, SpiderItemStatus} from "./base";
 import {SERVICE_IDENTIFIER} from "../constants/ioc";
 import {IHouseManager} from "../manager/house";
 import {IComplexManager} from "../manager/complex";
 
+class CDSoldItem implements SpiderItem {
+    id: any;
+    url: string;
+    status: any = SpiderItemStatus.Waiting;
+    percent: number = 0;
+}
 
 @injectable()
 export class CDHouseSoldSpider extends BaseSpider {
@@ -28,8 +34,8 @@ export class CDHouseSoldSpider extends BaseSpider {
     private targetUrls: string[] = [];
     private curDate: Date;
 
-    async parsePromise(url: string) {
-        this.Event.emit(SpiderEvents.Parsing, SpiderEventsType.Sold, url);
+    async parsePromise(spiderItem: SpiderItem) {
+        let url = spiderItem.url;
         let complexID = "";
         let pattern_complex= /(\d{8,})/
         let match_complex = pattern_complex.exec(url);
@@ -103,7 +109,7 @@ export class CDHouseSoldSpider extends BaseSpider {
         if (!this.curDate) {
             this.curDate = new Date();
         }
-        let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate, 1);
+        let complexes = await this.complexManager.getComplexesToBeUpdated(this.curDate);
         let jobs: Promise<any>[] = [];
         for (let complex of complexes) {
             jobs.push(this.parsePage(complex.lj_id));
@@ -118,8 +124,20 @@ export class CDHouseSoldSpider extends BaseSpider {
         let totalPage = $(".page-box").attr("page-data").trim();
         let totalPageNum = parseInt(JSON.parse(totalPage)['totalPage']);
         for (let pageNum = totalPageNum; pageNum > 0; pageNum--) {
-            this.targetUrls.push(url + "pg" + pageNum);
+            let item = new CDSoldItem();
+            item.id = complexID + pageNum;
+            item.url = url + 'pg' + pageNum;
+            this.allTargetItems.push(item);
+            this.currTargetItems.push(item)
         }
-        this.Event.emit(SpiderEvents.TargetUrlChange, SpiderEventsType.Sold, this.targetUrls);
+    }
+
+    async prepareTargetItems(){
+        await this.updateUrlsFromDB();
+    }
+
+
+    getSpiderEventType(): string {
+        return SpiderEventsType.Sold;
     }
 }
