@@ -13,8 +13,8 @@ import lodash = require('lodash');
 import Bluebird = require('bluebird');
 
 export interface IComplexManager {
-    save(complex: ComplexAttribute): Bluebird<ComplexInstance[]>;
-    save(complexes: ComplexAttribute[]): Bluebird<ComplexInstance[]>;
+    save(complex: ComplexAttribute): Promise<ComplexInstance[]>;
+    save(complexes: ComplexAttribute[]): Promise<ComplexInstance[]>;
     getComplexesToBeUpdated(time: Date);
     getComplexesToBeUpdated(time: Date, limit);
 }
@@ -47,11 +47,13 @@ export class ComplexManager extends BaseManager<ComplexAttribute> implements ICo
                 where: {
                     id: ids
                 }
-            }).thenReturn(records);
+            }).then(()=>{
+                return records;
+            });
         });
     }
 
-    public save(attributes: ComplexAttribute | ComplexAttribute[]): Bluebird<ComplexInstance[]> {
+    public save(attributes: ComplexAttribute | ComplexAttribute[]): Promise<ComplexInstance[]> {
         debug("saving complex : %s", Array.isArray(attributes) ? "array " + attributes.length : attributes);
         if (!Array.isArray(attributes)) {
             return this.save([attributes]);

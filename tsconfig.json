@@ -10,12 +10,5 @@
   },
   "exclude": [
     "node_modules"
-  ],
-  "include":[
-    "index.ts",
-    "typings/**/*",
-    "src/**/*",
-    "test/*",
-    "node_modules/inversify/dts/**/*"
   ]
 }

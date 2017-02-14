@@ -6,7 +6,6 @@ import {dbConfig, initMysql} from '../config/db';
 import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 import {getDebugger} from '../util/debug';
-import {Connection} from '~sequelize/index';
 import Koa = require('koa');
 import KoaRouter = require('koa-router');
 import {IMiddleware} from 'koa-router';
@@ -16,6 +15,7 @@ let app = new Koa();
 import {IBaseSpider, SpiderEvents} from "../spider/base";
 import {getLogger} from '../config/log';
 import IO = require('socket.io');
+import {Sequelize} from 'sequelize';
 let debug = getDebugger("server");
 let logger = getLogger();
 async function init() {
@@ -23,7 +23,7 @@ async function init() {
     if (dbConfig.option.dialect === "mysql") {
         await initMysql();
     }
-    let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
+    let sequelize = container.get<Sequelize>(SERVICE_IDENTIFIER.Sequelize);
 
     process.on("exit", () => {
         debug("exiting...");

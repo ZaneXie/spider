@@ -4,8 +4,7 @@
 
 import {Base} from "./index";
 import Sequelize = require('sequelize');
-import DataTypes = require('sequelize/lib/data-types');
-import {Model} from "~sequelize/index";
+import {DataTypes} from 'sequelize';
 export type ComplexType = "default"|"revision";
 export interface ComplexAttribute extends Base {
     lj_id?: string;
@@ -14,18 +13,18 @@ export interface ComplexAttribute extends Base {
     type?: ComplexType;
 }
 
-export interface ComplexInstance extends Sequelize.Instance<ComplexInstance, ComplexAttribute>, ComplexAttribute {
+export interface ComplexInstance extends Sequelize.Instance<ComplexAttribute>, ComplexAttribute {
 
 }
 
-export const define = (sequelize): Model<ComplexInstance, ComplexAttribute> => {
+export const define = (sequelize): Sequelize.Model<ComplexInstance, ComplexAttribute> => {
     let complex = sequelize.define("complex", {
-            lj_id: DataTypes.STRING(32),
-            url  : DataTypes.STRING(512),
-            name : DataTypes.STRING(512),
-            type : {
-                type        : DataTypes.ENUM<string>("default", "revision"),
-                allowNull   : false,
+            lj_id: Sequelize.STRING(32),
+            url: Sequelize.STRING(512),
+            name: Sequelize.STRING(512),
+            type: {
+                type: Sequelize.ENUM("default", "revision"),
+                allowNull: false,
                 defaultValue: "default"
             },
         },

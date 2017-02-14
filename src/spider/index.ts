@@ -8,17 +8,17 @@ import Bluebird = require('bluebird');
 import fs = require('fs-extra-promise');
 import container from '../config/ioc';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
-import {Connection} from '~sequelize/index';
 import {dbConfig, initMysql} from '../config/db';
 import {IBaseSpider, SpiderEvents} from "./base";
 import {getDebugger} from "../util/debug";
+import {Sequelize} from 'sequelize';
 let debug = getDebugger("spider");
 
 let main = async() => {
     if (dbConfig.option.dialect === "mysql") {
         await initMysql();
     }
-    let sequelize = container.get<Connection>(SERVICE_IDENTIFIER.Sequelize);
+    let sequelize = container.get<Sequelize>(SERVICE_IDENTIFIER.Sequelize);
 
     process.on("exit", () => {
         debug("exiting...");

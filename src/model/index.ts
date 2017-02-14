@@ -8,10 +8,8 @@ import path = require('path');
 import Complex = require('./complex')
 import House = require('./house')
 import {ComplexInstance, ComplexAttribute} from './complex';
-import {Model} from '~sequelize/index';
 import {HouseAttribute, HouseInstance} from './house';
 import {inject, injectable} from 'inversify';
-import {Connection} from '~sequelize/index';
 import {SERVICE_IDENTIFIER} from '../constants/ioc';
 
 export interface Base {
@@ -20,10 +18,10 @@ export interface Base {
 
 @injectable()
 export class DataBase {
-    public complex: Model<ComplexInstance, ComplexAttribute>;
-    public house: Model<HouseInstance, HouseAttribute>;
+    public complex: Sequelize.Model<ComplexInstance, ComplexAttribute>;
+    public house: Sequelize.Model<HouseInstance, HouseAttribute>;
 
-    public constructor(@inject(SERVICE_IDENTIFIER.Sequelize) sequelize: Connection) {
+    public constructor(@inject(SERVICE_IDENTIFIER.Sequelize) sequelize: Sequelize.SequelizeStatic) {
         this.complex = Complex.define(sequelize);
         this.house = House.define(sequelize);
     }

@@ -13,8 +13,8 @@ import lodash = require('lodash');
 import Bluebird = require('bluebird');
 
 export interface IHouseManager {
-    save(complex: HouseAttribute): Bluebird<HouseInstance[]>;
-    save(complexes: HouseAttribute[]): Bluebird<HouseInstance[]>;
+    save(complex: HouseAttribute): Promise<HouseInstance[]>;
+    save(complexes: HouseAttribute[]): Promise<HouseInstance[]>;
 }
 
 @injectable()
@@ -26,7 +26,7 @@ export class HouseManager extends BaseManager<HouseAttribute> implements IHouseM
         this.database = database;
     }
 
-    public save(attributes: HouseAttribute| HouseAttribute[]): Bluebird<HouseInstance[]> {
+    public save(attributes: HouseAttribute| HouseAttribute[]): Promise<HouseInstance[]> {
         debug("saving house : %s", Array.isArray(attributes) ? "array " + attributes.length : attributes);
         if (!Array.isArray(attributes)) {
             return this.save([attributes]);

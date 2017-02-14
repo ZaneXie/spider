@@ -4,8 +4,6 @@
 
 import {Base} from "./index";
 import Sequelize = require('sequelize');
-import DataTypes = require('sequelize/lib/data-types');
-import {Model} from "~sequelize/index";
 export type HouseType = "default" | "revision";
 export interface HouseAttribute extends Base {
     lj_id?: string;
@@ -23,28 +21,28 @@ export interface HouseAttribute extends Base {
     deal_date?:Date;
 }
 
-export interface HouseInstance extends Sequelize.Instance<HouseInstance, HouseAttribute>, HouseAttribute {
+export interface HouseInstance extends Sequelize.Instance<HouseAttribute>, HouseAttribute {
 
 }
 
 let tableDefine = {
-    lj_id      : DataTypes.STRING(32),
-    url        : DataTypes.STRING(512),
-    title      : DataTypes.STRING(512),
-    complex_id : DataTypes.STRING(512),
-    layout     : DataTypes.STRING(512),
-    area       : DataTypes.DOUBLE,
-    location   : DataTypes.STRING(512),
-    total_price: DataTypes.INTEGER,
-    unit_price : DataTypes.INTEGER,
-    visitor_num: DataTypes.INTEGER,
+    lj_id      : Sequelize.STRING(32),
+    url        : Sequelize.STRING(512),
+    title      : Sequelize.STRING(512),
+    complex_id : Sequelize.STRING(512),
+    layout     : Sequelize.STRING(512),
+    area       : Sequelize.DOUBLE,
+    location   : Sequelize.STRING(512),
+    total_price: Sequelize.INTEGER,
+    unit_price : Sequelize.INTEGER,
+    visitor_num: Sequelize.INTEGER,
     type       : {
-        type        : DataTypes.ENUM<string>("default", "revision"),
+        type        : Sequelize.ENUM("default", "revision"),
         allowNull   : false,
         defaultValue: "default",
     },
-    detail      : DataTypes.STRING(512),
-    deal_date   : DataTypes.DATE
+    detail      : Sequelize.STRING(512),
+    deal_date   : Sequelize.DATE
 };
 
 let index = {
@@ -58,7 +56,7 @@ let index = {
     ]
 };
 
-export const define = (sequelize): Model<HouseInstance, HouseAttribute> => {
+export const define = (sequelize): Sequelize.Model<HouseInstance, HouseAttribute> => {
     let house = sequelize.define("house", tableDefine, index);
 
     return house;
