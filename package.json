@@ -33,7 +33,7 @@
     "@types/cheerio": "^0.17.31",
     "@types/debug": "0.0.29",
     "@types/fs-extra-promise": "0.0.31",
-    "@types/koa": "^2.0.37",
+    "@types/koa": "^2.0.38",
     "@types/koa-router": "^7.0.21",
     "@types/lodash": "^4.14.52",
     "@types/mocha": "^2.2.39",
