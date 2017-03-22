@@ -34,7 +34,7 @@
     "@types/debug": "0.0.29",
     "@types/fs-extra-promise": "0.0.31",
     "@types/koa": "^2.0.37",
-    "@types/koa-router": "^7.0.21",
+    "@types/koa-router": "^7.0.22",
     "@types/lodash": "^4.14.52",
     "@types/mocha": "^2.2.39",
     "@types/mysql": "0.0.31",
