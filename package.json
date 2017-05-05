@@ -37,7 +37,7 @@
     "@types/koa-router": "^7.0.21",
     "@types/lodash": "^4.14.52",
     "@types/mocha": "^2.2.39",
-    "@types/mysql": "0.0.31",
+    "@types/mysql": "0.0.33",
     "@types/node": "^7.0.5",
     "@types/request-promise": "^4.1.33",
     "@types/sequelize": "^4.0.41",
