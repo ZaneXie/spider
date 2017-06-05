@@ -44,7 +44,7 @@
     "@types/socket.io": "^1.4.27",
     "@types/sqlite3": "^2.2.32",
     "@types/winston": "^2.2.0",
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "mocha": "^3.2.0",
     "ts-node": "^2.1.1",
     "typescript": "^2.0.10"
