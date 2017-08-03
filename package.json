@@ -31,7 +31,7 @@
     "@types/bluebird": "^3.0.37",
     "@types/chai": "^4.0.1",
     "@types/cheerio": "^0.22.0",
-    "@types/debug": "0.0.29",
+    "@types/debug": "0.0.30",
     "@types/fs-extra-promise": "0.0.31",
     "@types/koa": "^2.0.37",
     "@types/koa-router": "^7.0.21",
